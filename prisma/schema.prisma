@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StatutBien {
+  DISPONIBLE
+  RESERVE
+  VENDU
+  RETIRE
+}
+
 model Conseiller {
   id           String   @id @default(cuid())
   nom          String
@@ -45,6 +52,7 @@ model Prospect {
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  @@index([conseillerId, derniereActivite])
 }
 
 model Bien {
@@ -57,7 +65,7 @@ model Bien {
   surface       Float?
   pieces        Int?
   ville         String
-  disponible    Boolean  @default(true)
+  statut        StatutBien @default(DISPONIBLE)
   planUrl       String?
 
   historique    HistoriqueDisponibilite[]
@@ -71,8 +79,8 @@ model HistoriqueDisponibilite {
   id          String   @id @default(cuid())
   bienId      String
   bien        Bien     @relation(fields: [bienId], references: [id])
-  ancienEtat  Boolean
-  nouvelEtat  Boolean
+  ancienStatut   StatutBien
+  nouveauStatut  StatutBien
   raison      String?
   changedAt   DateTime @default(now())
 }
@@ -94,7 +102,7 @@ model RendezVous {
 model Echange {
   id          String   @id @default(cuid())
   prospectId  String
-  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  prospect    Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
   type        String   // email, appel, sms, note
   contenu     String
   createdAt   DateTime @default(now())
@@ -103,7 +111,7 @@ model Echange {
 model Document {
   id          String   @id @default(cuid())
   prospectId  String
-  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  prospect    Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
   url         String
   nom         String
   createdAt   DateTime @default(now())
@@ -112,9 +120,15 @@ model Document {
 model Tache {
   id          String   @id @default(cuid())
   prospectId  String
-  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  prospect    Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
   titre       String
   fait        Boolean  @default(false)
   echeance    DateTime?
   createdAt   DateTime @default(now())
+}
+
+model TauxChange {
+  devise   String   @id
+  versTND  Float
+  majLe    DateTime @default(now())
 }

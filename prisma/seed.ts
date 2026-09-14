@@ -6,6 +6,21 @@ const prisma = new PrismaClient();
 async function main() {
     const passwordHash = await bcrypt.hash("password123", 10);
 
+    // --- Taux de change (devise pivot : TND) ---
+    const taux = [
+        { devise: "TND", versTND: 1 },
+        { devise: "EUR", versTND: 3.4 },
+        { devise: "USD", versTND: 3.1 },
+    ];
+
+    for (const t of taux) {
+        await prisma.tauxChange.upsert({
+            where: { devise: t.devise },
+            update: { versTND: t.versTND },
+            create: t,
+        });
+    }
+
     const conseiller = await prisma.conseiller.upsert({
         where: { email: "sami@crm-immo.tn" },
         update: {},
@@ -28,7 +43,7 @@ async function main() {
             surface: 85,
             pieces: 3,
             ville: "La Marsa",
-            disponible: true,
+            statut: "DISPONIBLE",
         },
     });
 
@@ -44,10 +59,11 @@ async function main() {
             surface: 250,
             pieces: 6,
             ville: "Gammarth",
-            disponible: true,
+            statut: "DISPONIBLE",
         },
     });
 
+    // Bien RÉSERVÉ : sert à démontrer l'exigence 01 (jamais proposé au matching)
     await prisma.bien.upsert({
         where: { reference: "APT-002" },
         update: {},
@@ -60,7 +76,7 @@ async function main() {
             surface: 60,
             pieces: 2,
             ville: "Tunis",
-            disponible: false,
+            statut: "RESERVE",
         },
     });
 
@@ -79,6 +95,26 @@ async function main() {
             consentementAt: new Date(),
             statutPipeline: "qualification",
             montantPotentiel: 350000,
+            conseillerId: conseiller.id,
+        },
+    });
+
+    // Prospect en EUR : sert à démontrer le cas limite "budget en devise différente"
+    await prisma.prospect.upsert({
+        where: { email: "pierre@example.fr" },
+        update: {},
+        create: {
+            nom: "Pierre Dubois",
+            email: "pierre@example.fr",
+            telephone: "+33612345678",
+            budgetMin: 80000,
+            budgetMax: 120000,
+            devise: "EUR",
+            critereBrut: "Villa avec piscine, Gammarth ou La Marsa, budget 120k euros",
+            consentement: true,
+            consentementAt: new Date(),
+            statutPipeline: "nouveau",
+            montantPotentiel: 400000,
             conseillerId: conseiller.id,
         },
     });
