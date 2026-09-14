@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { deplacerProspect } from "@/app/(app)/dashboard/actions";
 import { formatPrix } from "@/lib/format";
+import Link from "next/link";
 
 type Colonne = { id: string; cle: string; libelle: string };
 type Prospect = {
@@ -81,7 +82,12 @@ export function Pipeline({
                                         className="relative rounded-xl border border-sable-200 bg-white p-4"
                                     >
                                         <div className="flex items-start justify-between gap-2">
-                                            <h3 className="text-sm font-medium">{p.nom}</h3>
+                                            <Link
+                                                href={`/prospects/${p.id}`}
+                                                className="text-sm font-medium hover:text-foret-700"
+                                            >
+                                                {p.nom}
+                                            </Link>
                                             <button
                                                 onClick={() =>
                                                     setMenuOuvert(menuOuvert === p.id ? null : p.id)
