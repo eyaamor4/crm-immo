@@ -21,7 +21,7 @@ model Conseiller {
 model Prospect {
   id             String   @id @default(cuid())
   nom            String
-  email          String?
+  email          String?  @unique
   telephone      String?
   budgetMin      Int?
   budgetMax      Int?
