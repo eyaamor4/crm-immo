@@ -33,7 +33,7 @@ async function main() {
 
     await prisma.bien.upsert({
         where: { reference: "APT-001" },
-        update: {},
+        update: { statut: "DISPONIBLE" },
         create: {
             reference: "APT-001",
             titre: "Appartement S+2 vue mer",
@@ -49,7 +49,7 @@ async function main() {
 
     await prisma.bien.upsert({
         where: { reference: "VIL-001" },
-        update: {},
+        update: { statut: "DISPONIBLE" },
         create: {
             reference: "VIL-001",
             titre: "Villa avec piscine",
@@ -66,7 +66,7 @@ async function main() {
     // Bien RÉSERVÉ : sert à démontrer l'exigence 01 (jamais proposé au matching)
     await prisma.bien.upsert({
         where: { reference: "APT-002" },
-        update: {},
+        update: { statut: "RESERVE" },
         create: {
             reference: "APT-002",
             titre: "Appartement S+1 centre-ville",
