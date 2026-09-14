@@ -132,3 +132,11 @@ model TauxChange {
   versTND  Float
   majLe    DateTime @default(now())
 }
+
+model ColonnePipeline {
+  id      String @id @default(cuid())
+  cle     String @unique
+  libelle String
+  ordre   Int
+  couleur String @default("foret")
+}

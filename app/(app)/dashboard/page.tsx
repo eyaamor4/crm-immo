@@ -1,17 +1,40 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { Pipeline } from "@/components/pipeline";
 
 export default async function DashboardPage() {
   const session = await auth();
+  const conseillerId = session!.user.id;
 
-  const [nbProspects, nbBiens, nbRdv] = await Promise.all([
-    prisma.prospect.count({ where: { conseillerId: session!.user.id } }),
+  const [colonnes, prospectsBruts, nbBiens, nbRdv] = await Promise.all([
+    prisma.colonnePipeline.findMany({ orderBy: { ordre: "asc" } }),
+    prisma.prospect.findMany({
+      where: { conseillerId },
+      orderBy: { derniereActivite: "desc" },
+      include: {
+        taches: {
+          where: { fait: false },
+          orderBy: { echeance: "asc" },
+          take: 1,
+        },
+      },
+    }),
     prisma.bien.count({ where: { statut: "DISPONIBLE" } }),
-    prisma.rendezVous.count({ where: { conseillerId: session!.user.id } }),
+    prisma.rendezVous.count({ where: { conseillerId } }),
   ]);
 
+  const prospects = prospectsBruts.map((p) => ({
+    id: p.id,
+    nom: p.nom,
+    statutPipeline: p.statutPipeline,
+    montantPotentiel: p.montantPotentiel,
+    devise: p.devise,
+    derniereActivite: p.derniereActivite.toISOString(),
+    prochaineTache: p.taches[0]?.titre ?? null,
+  }));
+
   const stats = [
-    { label: "Prospects actifs", valeur: nbProspects },
+    { label: "Prospects actifs", valeur: prospects.length },
     { label: "Biens disponibles", valeur: nbBiens },
     { label: "Visites planifiées", valeur: nbRdv },
   ];
@@ -19,7 +42,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl">Bonjour {session?.user?.name?.split(" ")[0]}</h1>
+        <h1 className="text-3xl">
+          Bonjour {session?.user?.name?.split(" ")[0]}
+        </h1>
         <p className="mt-1 text-sm text-encre-600">
           Voici l'état de votre portefeuille aujourd'hui.
         </p>
@@ -41,9 +66,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-dashed border-sable-300 p-10 text-center">
-        <p className="text-sm text-encre-400">Le pipeline arrive ici.</p>
-      </div>
+      <Pipeline colonnes={colonnes} prospects={prospects} />
     </div>
   );
 }

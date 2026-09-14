@@ -20,6 +20,21 @@ async function main() {
             create: t,
         });
     }
+    const colonnes = [
+        { cle: "nouveau", libelle: "Nouveau", ordre: 1 },
+        { cle: "qualification", libelle: "Qualification", ordre: 2 },
+        { cle: "visite", libelle: "Visite planifiée", ordre: 3 },
+        { cle: "offre", libelle: "Offre en cours", ordre: 4 },
+        { cle: "conclu", libelle: "Conclu", ordre: 5 },
+    ];
+
+    for (const c of colonnes) {
+        await prisma.colonnePipeline.upsert({
+            where: { cle: c.cle },
+            update: { libelle: c.libelle, ordre: c.ordre },
+            create: c,
+        });
+    }
 
     const conseiller = await prisma.conseiller.upsert({
         where: { email: "sami@crm-immo.tn" },
