@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatPrix } from "@/lib/format";
 import type { Resultat } from "@/lib/matching";
+import { ExtractionCriteres } from "@/components/extraction-criteres";
 
 type Props = {
     prospect: {
@@ -104,11 +105,19 @@ export function FicheOnglets(props: Props) {
                         )}
                     </div>
 
-                    <div className="rounded-xl border border-sable-200 bg-white p-5 md:col-span-2">
+                                     <div className="rounded-xl border border-sable-200 bg-white p-5 md:col-span-2">
                         <h3 className="text-sm font-medium">Note libre</h3>
                         <p className="mt-2 text-sm leading-relaxed text-encre-600">
                             {prospect.critereBrut ?? "Aucune note."}
                         </p>
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <ExtractionCriteres
+                            prospectId={prospect.id}
+                            criteresIA={prospect.criteresIA as Record<string, unknown> | null}
+                            aUneNote={!!prospect.critereBrut}
+                        />
                     </div>
                 </div>
             )}
