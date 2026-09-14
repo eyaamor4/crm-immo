@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conseiller {
+  id           String   @id @default(cuid())
+  nom          String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  prospects    Prospect[]
+  rendezVous   RendezVous[]
+}
+
+model Prospect {
+  id             String   @id @default(cuid())
+  nom            String
+  email          String?
+  telephone      String?
+  budgetMin      Int?
+  budgetMax      Int?
+  devise         String   @default("TND")
+  critereBrut    String?  // note libre saisie par le conseiller
+  criteresIA     Json?    // brouillon extrait par l'IA (non validé)
+  criteresValide Json?    // critères validés par le conseiller
+  consentement   Boolean  @default(false)
+  consentementAt DateTime?
+  statutPipeline String   @default("nouveau")
+  montantPotentiel Int?
+  derniereActivite DateTime @default(now())
+
+  conseillerId   String
+  conseiller     Conseiller @relation(fields: [conseillerId], references: [id])
+
+  echanges       Echange[]
+  rendezVous     RendezVous[]
+  documents      Document[]
+  taches         Tache[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Bien {
+  id            String   @id @default(cuid())
+  reference     String   @unique
+  titre         String
+  type          String
+  prix          Int
+  devise        String   @default("TND")
+  surface       Float?
+  pieces        Int?
+  ville         String
+  disponible    Boolean  @default(true)
+  planUrl       String?
+
+  historique    HistoriqueDisponibilite[]
+  rendezVous    RendezVous[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model HistoriqueDisponibilite {
+  id          String   @id @default(cuid())
+  bienId      String
+  bien        Bien     @relation(fields: [bienId], references: [id])
+  ancienEtat  Boolean
+  nouvelEtat  Boolean
+  raison      String?
+  changedAt   DateTime @default(now())
+}
+
+model RendezVous {
+  id            String   @id @default(cuid())
+  prospectId    String
+  prospect      Prospect @relation(fields: [prospectId], references: [id])
+  bienId        String?
+  bien          Bien?    @relation(fields: [bienId], references: [id])
+  conseillerId  String
+  conseiller    Conseiller @relation(fields: [conseillerId], references: [id])
+  debut         DateTime
+  fin           DateTime
+  statut        String   @default("confirme")
+  createdAt     DateTime @default(now())
+}
+
+model Echange {
+  id          String   @id @default(cuid())
+  prospectId  String
+  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  type        String   // email, appel, sms, note
+  contenu     String
+  createdAt   DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  prospectId  String
+  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  url         String
+  nom         String
+  createdAt   DateTime @default(now())
+}
+
+model Tache {
+  id          String   @id @default(cuid())
+  prospectId  String
+  prospect    Prospect @relation(fields: [prospectId], references: [id])
+  titre       String
+  fait        Boolean  @default(false)
+  echeance    DateTime?
+  createdAt   DateTime @default(now())
+}
