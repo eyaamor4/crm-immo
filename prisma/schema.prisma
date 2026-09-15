@@ -30,6 +30,7 @@ model Prospect {
   nom            String
   email          String?  @unique
   telephone      String?
+  telephoneNormalise String?  @unique
   budgetMin      Int?
   budgetMax      Int?
   devise         String   @default("TND")
