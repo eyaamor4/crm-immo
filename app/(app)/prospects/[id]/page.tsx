@@ -77,6 +77,7 @@ export default async function FicheProspect({
             <FicheOnglets
                 prospect={{
                     id: prospect.id,
+                    nom: prospect.nom,
                     budgetMin: prospect.budgetMin,
                     budgetMax: prospect.budgetMax,
                     devise: prospect.devise,

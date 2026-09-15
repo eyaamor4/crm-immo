@@ -5,9 +5,15 @@ import { formatPrix } from "@/lib/format";
 import type { Resultat } from "@/lib/matching";
 import { ExtractionCriteres } from "@/components/extraction-criteres";
 
+import { BlocRgpd } from "@/components/bloc-rgpd";
+
+
 type Props = {
     prospect: {
         id: string;
+            
+        nom: string;
+
         budgetMin: number | null;
         budgetMax: number | null;
         devise: string;
@@ -119,6 +125,14 @@ export function FicheOnglets(props: Props) {
                             aUneNote={!!prospect.critereBrut}
                         />
                     </div>
+                    <div className="md:col-span-2">
+                        <BlocRgpd
+                            prospectId={prospect.id}
+                            consentement={prospect.consentement}
+                            nom={prospect.nom}
+                        />
+                    </div>
+
                 </div>
             )}
 
