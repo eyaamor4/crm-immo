@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { extraireCriteres } from "@/lib/extraction";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 async function verifierAcces(prospectId: string) {
   const session = await auth();
@@ -50,7 +51,10 @@ export async function validerCriteres(
     await prisma.$transaction([
       prisma.prospect.update({
         where: { id: prospectId },
-        data: { criteresValide: criteres, derniereActivite: new Date() },
+                data: {
+          criteresValide: criteres as Prisma.InputJsonValue,
+          derniereActivite: new Date(),
+        },
       }),
       prisma.echange.create({
         data: {

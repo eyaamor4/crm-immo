@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { matcher } from "@/lib/matching";
+import { matcher, type Resultat } from "@/lib/matching";
 import { formatPrix } from "@/lib/format";
 import { FicheOnglets } from "@/components/fiche-onglets";
 import { notFound } from "next/navigation";
@@ -30,7 +30,7 @@ export default async function FicheProspect({
     if (!prospect) notFound();
     if (prospect.conseillerId !== session!.user.id) notFound();
 
-    let matchs;
+    let matchs: Resultat[];
     let erreurMatching: string | null = null;
     try {
         matchs = await matcher(prospect.id);
