@@ -14,6 +14,8 @@ export async function GET(request: Request) {
       derniereActivite: { lt: seuil },
       consentement: true, // cas limite : consentement retiré → pas de relance
       statutPipeline: { notIn: ["conclu", "perdu"] },
+      taches: { none: { fait: false, titre: { startsWith: "Relance à valider" } } },
+
     },
     include: {
       conseiller: { select: { nom: true, email: true } },

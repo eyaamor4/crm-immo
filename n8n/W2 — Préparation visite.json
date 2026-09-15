@@ -1,0 +1,211 @@
+{
+  "name": "W2 — Préparation visite",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f0a16bd1-2925-4292-bcd7-b7e62ab5abc5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-immo-six.vercel.app/api/visites/preparation",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-secret",
+              "value": "n8n_secret_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5ccfce61-3296-47dc-b061-688426451564",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "visites",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "98812de1-ddf9-474f-b1ae-ec875fdd1483",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"openai/gpt-oss-20b\",\n  temperature: 0.3,\n  response_format: { type: \"json_object\" },\n  messages: [\n    { role: \"system\", content: \"Tu prépares un conseiller immobilier avant une visite. Réponds UNIQUEMENT avec un objet JSON de la forme {\\\"elements\\\": [\\\"...\\\", \\\"...\\\"]} contenant 4 à 6 points de préparation concrets en français. Pas de texte autour.\" },\n    { role: \"user\", content: \"Visite de \" + $json.prospect.nom + \" à \" + $json.heure + \". Bien : \" + JSON.stringify($json.bien) + \". Budget du prospect : \" + $json.prospect.budget + \". Critères : \" + JSON.stringify($json.prospect.criteres) }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "502af491-382e-4b2d-adbe-1005c2c67753",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-immo-six.vercel.app/api/visites/checklist",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-secret",
+              "value": "n8n_secret_key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  prospectId: $('Split Out').item.json.prospect.id,\n  visiteId: $('Split Out').item.json.id,\n  elements: JSON.parse($json.choices[0].message.content).elements\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        0
+      ],
+      "id": "336e3ead-160d-4f4d-8c04-31577429662f",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "fromEmail": "onboarding@resend.dev",
+        "toEmail": "={{ $('Split Out').item.json.conseiller.email }}",
+        "subject": "=Rappel : visite demain à {{ $('Split Out').item.json.heure }}",
+        "emailFormat": "text",
+        "text": "=Bonjour {{ $('Split Out').item.json.conseiller.nom }},\n\nRappel de votre visite de demain à {{ $('Split Out').item.json.heure }}.\n\nProspect : {{ $('Split Out').item.json.prospect.nom }}\nTéléphone : {{ $('Split Out').item.json.prospect.telephone }}\nBien : {{ $('Split Out').item.json.bien.titre }} ({{ $('Split Out').item.json.bien.reference }})\nBudget du prospect : {{ $('Split Out').item.json.prospect.budget }}\n\nLa checklist de préparation a été ajoutée à la fiche du prospect :\nhttps://crm-immo-six.vercel.app/prospects/{{ $('Split Out').item.json.prospect.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "daf7a728-d8b8-4f0a-9e5b-5aa002c6dc61",
+      "name": "Send an Email",
+      "webhookId": "664a3e19-4b4b-4ab8-ba1b-5528cca1f085",
+      "credentials": {
+        "smtp": {
+          "id": "yoVGiWo7kgIoB3G2",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d005e9a3-9ace-4ff1-84a0-48091a46312b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e9357135bcbc055c5806a95bd9b2789f7223a6b69b678e85b2e3d73ab8ec2cc"
+  },
+  "nodeGroups": [],
+  "id": "FvzCjyObwHkrVpMJ",
+  "tags": []
+}
