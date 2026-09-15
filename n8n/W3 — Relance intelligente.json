@@ -1,0 +1,175 @@
+{
+  "name": "W3 — Relance intelligente",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "13d6169f-905d-4309-a529-73605d5cd919",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://crm-immo-six.vercel.app/api/relances",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-secret",
+              "value": "n8n_secret_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b5b93e48-38d8-43db-857c-0b1733d2d502",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "prospects",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d80831b9-5212-417c-98c1-74f33d62974c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"openai/gpt-oss-20b\",\n  temperature: 0.4,\n  messages: [\n    { role: \"system\", content: \"Tu rédiges des relances commerciales immobilières en français, chaleureuses et brèves (4 lignes maximum). Tu ne promets jamais de bien précis. Réponds uniquement avec le texte de l'email, sans objet ni signature.\" },\n    { role: \"user\", content: \"Prospect : \" + $json.nom + \". Inactif depuis \" + $json.joursInactif + \" jours. Budget : \" + $json.budget + \". Étape : \" + $json.etape + \". Derniers échanges : \" + JSON.stringify($json.derniersEchanges) }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "d57465bf-46ff-4cd6-9b5a-9daf7ca317f0",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-immo-six.vercel.app/api/relances/brouillon",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-secret",
+              "value": "n8n_secret_key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  prospectId: $('Split Out').item.json.id,\n  brouillon: $json.choices[0].message.content\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        0
+      ],
+      "id": "b96973f6-38f9-4779-baea-e09003531cdf",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a5aa0fa7-5769-4a88-888b-60b51bec2427",
+  "meta": {
+    "instanceId": "5e9357135bcbc055c5806a95bd9b2789f7223a6b69b678e85b2e3d73ab8ec2cc"
+  },
+  "nodeGroups": [],
+  "id": "W0T0R1nRWzONek1I",
+  "tags": []
+}

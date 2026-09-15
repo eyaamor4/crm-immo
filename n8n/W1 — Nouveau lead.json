@@ -1,0 +1,208 @@
+{
+  "name": "W1 — Nouveau lead",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nouveau-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "39b38888-111d-41cd-92fb-57a458544b1e",
+      "name": "Webhook",
+      "webhookId": "4e343011-e743-493b-8a12-2d2d5b302c34"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crm-immo-six.vercel.app/api/webhooks/lead",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-secret",
+              "value": "n8n_secret_key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "1cf9a3d9-83cd-4139-ac31-c278fb304cd4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "83fd7b48-9552-4eb6-9178-861fa3d88320",
+              "leftValue": "={{ $json.statut }}",
+              "rightValue": "cree",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7be9d271-fa37-4306-a6e6-c3236ecedcc2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "onboarding@resend.dev",
+        "toEmail": "={{ $json.conseiller.email }}",
+        "subject": "Nouveau lead affecté",
+        "emailFormat": "text",
+        "text": "=Bonjour {{ $json.conseiller.nom }},\n\nUn nouveau prospect vous a été affecté.\n\nFiche : https://crm-immo-six.vercel.app/prospects/{{ $json.prospectId }}\n\nLes critères ont été pré-extraits par l'IA et attendent votre validation.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        -80
+      ],
+      "id": "12f49850-7f5b-4bc0-ba68-1bbef9fff59e",
+      "name": "Send an Email",
+      "webhookId": "231b55c0-573d-404f-a308-04876a16dd3f",
+      "credentials": {
+        "smtp": {
+          "id": "yoVGiWo7kgIoB3G2",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Lead traité avec succès",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        96
+      ],
+      "id": "8ee5bbb2-3555-49e6-b8f7-72c33e22d3ea",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Lead traité avec succès",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        -80
+      ],
+      "id": "defbc9d7-a424-40a8-8e0b-58bdce8b074c",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "0ae2e42a-d0e6-4411-9c2f-814de1efca3d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e9357135bcbc055c5806a95bd9b2789f7223a6b69b678e85b2e3d73ab8ec2cc"
+  },
+  "nodeGroups": [],
+  "id": "IvVeMHRynTygXR9g",
+  "tags": []
+}
