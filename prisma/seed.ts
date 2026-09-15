@@ -37,11 +37,11 @@ async function main() {
     }
 
     const conseiller = await prisma.conseiller.upsert({
-        where: { email: "sami@crm-immo.tn" },
+        where: { email: "eya.amor@enis.tn" },
         update: {},
         create: {
-            nom: "Sami Ben Ali",
-            email: "sami@crm-immo.tn",
+            nom: "Eya Amor",
+            email: "eya.amor@enis.tn",
             passwordHash,
         },
     });
@@ -135,7 +135,7 @@ async function main() {
     });
 
     console.log("Seed terminé ✅");
-    console.log("Login démo → email: sami@crm-immo.tn / mot de passe: password123");
+    console.log("Login démo → email: eya.amor@enis.tn / mot de passe: password123");
 }
 
 main()
