@@ -11,6 +11,8 @@ type Prospect = {
     nom: string;
     statutPipeline: string;
     montantPotentiel: number | null;
+    montantTND: number;
+
     devise: string;
     derniereActivite: string;
     prochaineTache: string | null;
@@ -57,10 +59,7 @@ export function Pipeline({
             >
                 {colonnes.map((col) => {
                     const cartes = prospects.filter((p) => p.statutPipeline === col.cle);
-                    const total = cartes.reduce(
-                        (s, p) => s + (p.montantPotentiel ?? 0),
-                        0
-                    );
+                    const total = cartes.reduce((s, p) => s + p.montantTND, 0);
 
                     return (
                         <section key={col.id} className="w-72 shrink-0">

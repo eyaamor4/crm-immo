@@ -7,6 +7,7 @@ type Bien = {
     id: string;
     reference: string;
     titre: string;
+    planUrl: string | null;
     type: string;
     prix: number;
     devise: string;
@@ -51,6 +52,15 @@ export function CatalogueClient({ biens }: { biens: Bien[] }) {
                                 : "border-sable-200"
                                 }`}
                         >
+                                          {b.planUrl && (
+                <div className="mb-3 -mx-5 -mt-5 overflow-hidden rounded-t-xl bg-sable-100">
+                  <img
+                    src={b.planUrl}
+                    alt={`Plan de ${b.titre}`}
+                    className="h-40 w-full object-cover"
+                  />
+                </div>
+              )}
                             <div className="flex items-start justify-between gap-3">
                                 <span className="text-[11px] uppercase tracking-widest text-encre-400">
                                     {b.reference}

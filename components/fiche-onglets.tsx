@@ -7,6 +7,15 @@ import { ExtractionCriteres } from "@/components/extraction-criteres";
 
 import { BlocRgpd } from "@/components/bloc-rgpd";
 
+const LIBELLES_CRITERES: Record<string, string> = {
+    villes: "Villes",
+    type: "Type de bien",
+    piecesMin: "Pièces minimum",
+    surfaceMin: "Surface minimum",
+    budgetMin: "Budget minimum",
+    budgetMax: "Budget maximum",
+    devise: "Devise",
+};
 
 type Props = {
     prospect: {
@@ -99,7 +108,7 @@ export function FicheOnglets(props: Props) {
                             <dl className="mt-2 space-y-1 text-sm">
                                 {Object.entries(criteres).map(([k, v]) => (
                                     <div key={k} className="flex justify-between gap-4">
-                                        <dt className="text-encre-400">{k}</dt>
+                                                                                <dt className="text-encre-400">{LIBELLES_CRITERES[k] ?? k}</dt>
                                         <dd>{Array.isArray(v) ? v.join(", ") : String(v)}</dd>
                                     </div>
                                 ))}

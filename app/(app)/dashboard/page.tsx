@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Pipeline } from "@/components/pipeline";
+import { convertirEnTND } from "@/lib/matching";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -22,16 +23,20 @@ export default async function DashboardPage() {
     prisma.bien.count({ where: { statut: "DISPONIBLE" } }),
     prisma.rendezVous.count({ where: { conseillerId } }),
   ]);
-
-  const prospects = prospectsBruts.map((p) => ({
-    id: p.id,
-    nom: p.nom,
-    statutPipeline: p.statutPipeline,
-    montantPotentiel: p.montantPotentiel,
-    devise: p.devise,
-    derniereActivite: p.derniereActivite.toISOString(),
-    prochaineTache: p.taches[0]?.titre ?? null,
-  }));
+  const prospects = await Promise.all(
+    prospectsBruts.map(async (p) => ({
+      id: p.id,
+      nom: p.nom,
+      statutPipeline: p.statutPipeline,
+      montantPotentiel: p.montantPotentiel,
+      montantTND: p.montantPotentiel
+        ? await convertirEnTND(p.montantPotentiel, p.devise)
+        : 0,
+      devise: p.devise,
+      derniereActivite: p.derniereActivite.toISOString(),
+      prochaineTache: p.taches[0]?.titre ?? null,
+    }))
+  );
 
   const stats = [
     { label: "Prospects actifs", valeur: prospects.length },

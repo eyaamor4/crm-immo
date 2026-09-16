@@ -48,7 +48,10 @@ async function main() {
 
     await prisma.bien.upsert({
         where: { reference: "APT-001" },
-        update: { statut: "DISPONIBLE" },
+        update: {
+            statut: "DISPONIBLE",
+            planUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
+        },
         create: {
             reference: "APT-001",
             titre: "Appartement S+2 vue mer",
@@ -59,12 +62,16 @@ async function main() {
             pieces: 3,
             ville: "La Marsa",
             statut: "DISPONIBLE",
+            planUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
         },
     });
 
     await prisma.bien.upsert({
         where: { reference: "VIL-001" },
-        update: { statut: "DISPONIBLE" },
+        update: {
+            statut: "DISPONIBLE",
+            planUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+        },
         create: {
             reference: "VIL-001",
             titre: "Villa avec piscine",
@@ -81,7 +88,10 @@ async function main() {
     // Bien RÉSERVÉ : sert à démontrer l'exigence 01 (jamais proposé au matching)
     await prisma.bien.upsert({
         where: { reference: "APT-002" },
-        update: { statut: "RESERVE" },
+        update: {
+            statut: "RESERVE",
+            planUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+        },
         create: {
             reference: "APT-002",
             titre: "Appartement S+1 centre-ville",
@@ -117,7 +127,7 @@ async function main() {
     // Prospect en EUR : sert à démontrer le cas limite "budget en devise différente"
     await prisma.prospect.upsert({
         where: { email: "pierre@example.fr" },
-        update: {},
+        update: { montantPotentiel: 120000 },
         create: {
             nom: "Pierre Dubois",
             email: "pierre@example.fr",
@@ -129,7 +139,7 @@ async function main() {
             consentement: true,
             consentementAt: new Date(),
             statutPipeline: "nouveau",
-            montantPotentiel: 400000,
+            montantPotentiel: 120000,
             conseillerId: conseiller.id,
         },
     });
