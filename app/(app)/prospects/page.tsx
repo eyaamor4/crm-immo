@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrix } from "@/lib/format";
 import Link from "next/link";
+import { FormulaireProspect } from "@/components/formulaire-prospect";
 
 export default async function ProspectsPage() {
     const session = await auth();
@@ -13,11 +14,14 @@ export default async function ProspectsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl">Prospects</h1>
-                <p className="mt-1 text-sm text-encre-600">
-                    {prospects.length} dossier{prospects.length > 1 ? "s" : ""} au portefeuille
-                </p>
+                        <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl">Prospects</h1>
+                    <p className="mt-1 text-sm text-encre-600">
+                        {prospects.length} dossier{prospects.length > 1 ? "s" : ""} au portefeuille
+                    </p>
+                </div>
+                <FormulaireProspect />
             </div>
 
             {prospects.length === 0 ? (
